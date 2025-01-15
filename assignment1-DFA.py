@@ -41,7 +41,7 @@ accept_states = {"q3"}
 
 # Simulate DFA with more complex input
 dfa = AdvancedDFA(states, alphabet, transition_function, start_state, accept_states)
-input_string = "0110011010"  # Complex hardcoded input
+input_string = "001101010"  # Complex hardcoded input
 print(f"Input: {input_string}")
 result = dfa.simulate(input_string)
 print(f"Result: {result}")
