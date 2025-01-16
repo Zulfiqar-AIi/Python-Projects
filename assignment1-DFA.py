@@ -8,24 +8,41 @@ class AdvancedDFA:
 
     def simulate(self, input_string):
         current_state = self.start_state
-        print(f"Initial state: {current_state}")
+        print(f"Starting DFA Simulation")
+        print(f"States: {self.states}")
+        print(f"Alphabet: {self.alphabet}")
+        print(f"Start State: {self.start_state}")
+        print(f"Accept States: {self.accept_states}")
+        print(f"Transition Function: {self.transition_function}")
+        print(f"Input String: {input_string}")
+        print(f"Initial State: {current_state}\n")
+        
         step = 1
 
         for symbol in input_string:
+            print(f"Step {step}:")
+            print(f"Current State: {current_state}")
+            print(f"Reading Symbol: '{symbol}'")
+
             if symbol not in self.alphabet:
-                return f"Error: Symbol '{symbol}' not in alphabet"
+                return f"Error: Symbol '{symbol}' not in alphabet. Terminating simulation."
+
             if current_state not in self.transition_function:
-                return f"Error: No transition defined for state '{current_state}'"
+                return f"Error: No transition defined for state '{current_state}'. Terminating simulation."
             
-            current_state = self.transition_function[current_state][symbol]
-            print(f"Step {step}: Read '{symbol}', transitioned to state '{current_state}'")
+            next_state = self.transition_function[current_state][symbol]
+            print(f"Transition: {current_state} --'{symbol}'--> {next_state}")
+            current_state = next_state
             step += 1
+            print(f"State After Transition: {current_state}\n")
+
+        print("Simulation Complete!")
+        print(f"Final State: {current_state}")
 
         if current_state in self.accept_states:
-            return f"Accepted: Ended in state '{current_state}'"
+            return f"Result: Accepted. The input string ended in an accept state '{current_state}'."
         else:
-            return f"Rejected: Ended in state '{current_state}'"
-
+            return f"Result: Rejected. The input string ended in a non-accept state '{current_state}'."
 
 # Advanced DFA configuration
 states = {"q0", "q1", "q2", "q3"}
@@ -44,4 +61,4 @@ dfa = AdvancedDFA(states, alphabet, transition_function, start_state, accept_sta
 input_string = "001101010"  # Complex hardcoded input
 print(f"Input: {input_string}")
 result = dfa.simulate(input_string)
-print(f"Result: {result}")
+print(f"\n{result}")
