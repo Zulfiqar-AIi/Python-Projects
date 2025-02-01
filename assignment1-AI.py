@@ -3,55 +3,63 @@ import torch.nn as nn
 import torch.optim as optim
 import matplotlib.pyplot as plt
 
-# Define XOR dataset
-X = torch.tensor([[0, 0], [0, 1], [1, 0], [1, 1]], dtype=torch.float32)
-y = torch.tensor([[0], [1], [1], [0]], dtype=torch.float32)
-
-# Define the Neural Network model
-class XOR_Network(nn.Module):
+# Step 1: Define the Neural Network
+class XORNet(nn.Module):
     def __init__(self):
-        super(XOR_Network, self).__init__()
-        self.hidden = nn.Linear(2, 4)  # Hidden layer with 4 neurons
-        self.output = nn.Linear(4, 1)  # Output layer with 1 neuron
-        self.activation = nn.Sigmoid() # Activation function
+        super(XORNet, self).__init__()
+        self.fc1 = nn.Linear(2, 4)  # Input layer to hidden layer (2 inputs, 4 hidden neurons)
+        self.fc2 = nn.Linear(4, 1)  # Hidden layer to output layer (4 hidden neurons, 1 output)
+        self.sigmoid = nn.Sigmoid()  # Activation function
 
     def forward(self, x):
-        x = self.activation(self.hidden(x))
-        x = self.activation(self.output(x))
+        x = self.sigmoid(self.fc1(x))  # Apply sigmoid to hidden layer
+        x = self.sigmoid(self.fc2(x))  # Apply sigmoid to output layer
         return x
 
-# Instantiate the model
-model = XOR_Network()
+# Step 2: Prepare the XOR Dataset
+inputs = torch.tensor([[0, 0], [0, 1], [1, 0], [1, 1]], dtype=torch.float32)
+outputs = torch.tensor([[0], [1], [1], [0]], dtype=torch.float32)
 
-# Define loss function and optimizer
-criterion = nn.BCELoss()  # Binary Cross Entropy Loss
-optimizer = optim.Adam(model.parameters(), lr=0.1)
+# Step 3: Initialize the Model, Loss Function, and Optimizer
+model = XORNet()
+criterion = nn.MSELoss()  # Mean Squared Error Loss
+optimizer = optim.SGD(model.parameters(), lr=0.1)  # Stochastic Gradient Descent
 
-# Training loop
-epochs = 5000
-losses = []
+# Step 4: Train the Model
+loss_history = []
+epochs = 10000
 
 for epoch in range(epochs):
-    optimizer.zero_grad()   # Reset gradients
-    outputs = model(X)      # Forward pass
-    loss = criterion(outputs, y)  # Compute loss
-    loss.backward()         # Backward pass
-    optimizer.step()        # Update weights
-    
-    losses.append(loss.item())  # Store loss for plotting
-    if epoch % 500 == 0:
-        print(f'Epoch {epoch}, Loss: {loss.item()}')
+    # Forward pass
+    predictions = model(inputs)
+    loss = criterion(predictions, outputs)
 
-# Plot the loss curve
-plt.plot(losses)
-plt.xlabel("Epochs")
-plt.ylabel("Loss")
-plt.title("Loss Curve")
+    # Backward pass and optimization
+    optimizer.zero_grad()
+    loss.backward()
+    optimizer.step()
+
+    # Store loss for plotting
+    loss_history.append(loss.item())
+
+    if (epoch + 1) % 1000 == 0:
+        print(f'Epoch [{epoch + 1}/{epochs}], Loss: {loss.item():.4f}')
+
+# Step 5: Plot the Loss Curve
+plt.plot(loss_history)
+plt.title('Loss Curve')
+plt.xlabel('Epoch')
+plt.ylabel('Loss')
 plt.show()
 
-# Evaluate the model
+# Step 6: Evaluate the Model's Accuracy
 with torch.no_grad():
-    predictions = model(X)
-    predictions = (predictions > 0.5).float()  # Convert to binary output
-    accuracy = (predictions == y).float().mean()
-    print(f"Model Accuracy: {accuracy.item() * 100:.2f}%")
+    predictions = model(inputs)
+    predicted_labels = (predictions > 0.5).float()  # Convert probabilities to binary outputs
+    accuracy = (predicted_labels == outputs).float().mean() * 100
+
+print(f'Accuracy: {accuracy:.2f}%')
+
+# Print predictions
+print("Predictions:")
+print(predictions.detach().numpy())
